@@ -1,0 +1,179 @@
+Here are several Cypher queries that you can run against the COVID-19 dataset in Neo4j. Each query retrieves different types of information based on the relationships and nodes created in your dataset.
+
+### 1. **List All Cases Reported in a Specific Country (e.g., USA):**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country {name: 'USA'})
+RETURN case.date AS Date, case.confirmed AS ConfirmedCases, case.deaths AS Deaths
+ORDER BY case.date ASC
+```
+
+### 2. **Find All Countries That Have Detected a Specific Variant (e.g., Delta):**
+
+```cypher
+MATCH (variant:Variant {name: 'Delta'})-[:DETECTED_IN]->(country:Country)
+RETURN country.name AS Country, variant.name AS Variant
+```
+
+### 3. **Get the Vaccination Details for a Specific Country (e.g., India):**
+
+```cypher
+MATCH (country:Country {name: 'India'})-[:VACCINATED_WITH]->(vaccine:Vaccine)
+RETURN country.name AS Country, vaccine.name AS Vaccine
+```
+
+### 4. **List All Variants Detected in a Specific Country (e.g., Brazil):**
+
+```cypher
+MATCH (country:Country {name: 'Brazil'})<-[:DETECTED_IN]-(variant:Variant)
+RETURN variant.name AS Variant, country.name AS Country
+```
+
+### 5. **Find the Total Confirmed Cases and Deaths on a Specific Date Globally (e.g., 2024-01-01):**
+
+```cypher
+MATCH (case:Case {date: '2024-01-01'})
+RETURN sum(case.confirmed) AS TotalConfirmedCases, sum(case.deaths) AS TotalDeaths
+```
+
+### 6. **Find the Most Recent Date a Case Was Reported in a Specific Country (e.g., USA):**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country {name: 'USA'})
+RETURN country.name AS Country, max(case.date) AS MostRecentDate
+```
+
+### 7. **List All Countries Vaccinated with a Specific Vaccine (e.g., Pfizer):**
+
+```cypher
+MATCH (country:Country)-[:VACCINATED_WITH]->(vaccine:Vaccine {name: 'Pfizer'})
+RETURN country.name AS Country, vaccine.name AS Vaccine
+```
+
+### 8. **Find the Daily Increase in Confirmed Cases in a Specific Country (e.g., India):**
+
+```cypher
+MATCH (c1:Case)-[:REPORTED_IN]->(country:Country {name: 'India'}),
+      (c2:Case)-[:REPORTED_IN]->(country)
+WHERE c2.date = date(c1.date) + duration({days: 1})
+RETURN c1.date AS Date, (c2.confirmed - c1.confirmed) AS DailyIncrease
+ORDER BY c1.date ASC
+```
+
+### 9. **Find All Cases Reported on a Specific Date (e.g., 2024-01-01):**
+
+```cypher
+MATCH (case:Case {date: '2024-01-01'})
+RETURN case.date AS Date, case.confirmed AS ConfirmedCases, case.deaths AS Deaths, 
+       labels(case)[0] AS NodeType
+```
+
+### 10. **List All Countries Along with the Total Number of Confirmed Cases Reported:**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country)
+RETURN country.name AS Country, sum(case.confirmed) AS TotalConfirmedCases
+ORDER BY TotalConfirmedCases DESC
+```
+
+These queries should cover a range of typical analyses you'd want to perform on a COVID-19 dataset in Neo4j. They make use of relationships between cases, countries, vaccines, and variants to retrieve useful information.
+
+If you'd like to visualize the results of your Cypher queries in Neo4j as a graph, you can use the following approach:
+
+### 1. **Visualizing All Cases Reported in a Specific Country (e.g., USA):**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country {name: 'USA'})
+RETURN case, country
+```
+
+This query will return the `Case` nodes connected to the `Country` node (USA) with the `REPORTED_IN` relationship, and it will display the results as a graph.
+
+### 2. **Visualizing All Countries That Have Detected a Specific Variant (e.g., Delta):**
+
+```cypher
+MATCH (variant:Variant {name: 'Delta'})-[:DETECTED_IN]->(country:Country)
+RETURN variant, country
+```
+
+This query will return the `Variant` node connected to the `Country` nodes where the variant was detected, showing the `DETECTED_IN` relationships.
+
+### 3. **Visualizing Vaccination Details for a Specific Country (e.g., India):**
+
+```cypher
+MATCH (country:Country {name: 'India'})-[:VACCINATED_WITH]->(vaccine:Vaccine)
+RETURN country, vaccine
+```
+
+This query will return the `Country` node (India) connected to the `Vaccine` nodes through the `VACCINATED_WITH` relationship.
+
+### 4. **Visualizing All Variants Detected in a Specific Country (e.g., Brazil):**
+
+```cypher
+MATCH (country:Country {name: 'Brazil'})<-[:DETECTED_IN]-(variant:Variant)
+RETURN country, variant
+```
+
+This query will return the `Country` node (Brazil) connected to the `Variant` nodes through the `DETECTED_IN` relationship.
+
+### 5. **Visualizing Total Confirmed Cases and Deaths on a Specific Date Globally (e.g., 2024-01-01):**
+
+```cypher
+MATCH (case:Case {date: '2024-01-01'})-[:REPORTED_IN]->(country:Country)
+RETURN case, country
+```
+
+This query will return the `Case` nodes on the specified date connected to their respective `Country` nodes.
+
+### 6. **Visualizing the Most Recent Date a Case Was Reported in a Specific Country (e.g., USA):**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country {name: 'USA'})
+RETURN country, case
+ORDER BY case.date DESC LIMIT 1
+```
+
+This query will return the most recent `Case` node connected to the `Country` node (USA).
+
+### 7. **Visualizing All Countries Vaccinated with a Specific Vaccine (e.g., Pfizer):**
+
+```cypher
+MATCH (country:Country)-[:VACCINATED_WITH]->(vaccine:Vaccine {name: 'Pfizer'})
+RETURN country, vaccine
+```
+
+This query will return the `Country` nodes connected to the `Vaccine` node (Pfizer) through the `VACCINATED_WITH` relationship.
+
+### 8. **Visualizing Daily Increase in Confirmed Cases in a Specific Country (e.g., India):**
+
+```cypher
+MATCH (c1:Case)-[:REPORTED_IN]->(country:Country {name: 'India'}),
+      (c2:Case)-[:REPORTED_IN]->(country)
+WHERE c2.date = date(c1.date) + duration({days: 1})
+RETURN country, c1, c2
+```
+
+This query will return the `Case` nodes showing the daily increase in confirmed cases connected to the `Country` node.
+
+### 9. **Visualizing All Cases Reported on a Specific Date (e.g., 2024-01-01):**
+
+```cypher
+MATCH (case:Case {date: '2024-01-01'})-[:REPORTED_IN]->(country:Country)
+RETURN case, country
+```
+
+This query will return the `Case` nodes for the specified date connected to their respective `Country` nodes.
+
+### 10. **Visualizing All Countries Along with the Total Number of Confirmed Cases Reported:**
+
+```cypher
+MATCH (case:Case)-[:REPORTED_IN]->(country:Country)
+RETURN country, case
+ORDER BY case.confirmed DESC
+```
+
+This query will return all `Country` nodes along with their connected `Case` nodes, ordered by the number of confirmed cases.
+
+### Visualization in Neo4j Browser
+
+When you run these queries in the Neo4j browser, the results will be displayed as a graph with nodes and relationships. You can interact with the graph, expand nodes, and explore the data visually. The `RETURN` clause ensures that both the nodes and their relationships are returned and visualized.
