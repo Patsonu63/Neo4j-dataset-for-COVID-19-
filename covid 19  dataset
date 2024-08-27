@@ -1,0 +1,42 @@
+// Create Country Nodes
+CREATE (:Country {name: 'USA'}),
+       (:Country {name: 'India'}),
+       (:Country {name: 'Brazil'});
+
+// Create Case Nodes
+CREATE (:Case {date: '2024-01-01', confirmed: 100000, deaths: 2000}),
+       (:Case {date: '2024-01-02', confirmed: 120000, deaths: 2500}),
+       (:Case {date: '2024-01-01', confirmed: 80000, deaths: 1500});
+
+// Create Vaccine Nodes
+CREATE (:Vaccine {name: 'Pfizer'}),
+       (:Vaccine {name: 'Moderna'}),
+       (:Vaccine {name: 'AstraZeneca'});
+
+// Create Variant Nodes
+CREATE (:Variant {name: 'Delta'}),
+       (:Variant {name: 'Omicron'}),
+       (:Variant {name: 'Beta'});
+
+// Create Relationships between Cases, Country, and Date
+MATCH (country:Country {name: 'USA'})
+WITH country
+MATCH (case:Case {date: '2024-01-01'})
+CREATE (case)-[:REPORTED_IN]->(country);
+
+MATCH (country:Country {name: 'India'})
+WITH country
+MATCH (case:Case {date: '2024-01-01'})
+CREATE (case)-[:REPORTED_IN]->(country);
+
+// Create Relationships between Country and Vaccine
+MATCH (country:Country {name: 'USA'})
+WITH country
+MATCH (vaccine:Vaccine {name: 'Pfizer'})
+CREATE (country)-[:VACCINATED_WITH]->(vaccine);
+
+// Create Relationships between Variant and Country
+MATCH (variant:Variant {name: 'Delta'})
+WITH variant
+MATCH (country:Country {name: 'Brazil'})
+CREATE (variant)-[:DETECTED_IN]->(country);
